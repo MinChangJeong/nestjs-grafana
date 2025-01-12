@@ -24,6 +24,8 @@ export class BoardService {
       content,
     });
     
+    throw new Error("error occured");
+
     await this.boardRepository.save(board);
 
     return board;

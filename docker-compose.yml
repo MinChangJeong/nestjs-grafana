@@ -18,12 +18,14 @@ services:
       interval: 5s
       timeout: 10s
       retries: 3
+    networks:
+      - app-network
 
   nestjs-app:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    container_name: my-nestjs
+    container_name: nestjs-app
     ports:
       - "3000:3000"
     depends_on:
@@ -39,6 +41,8 @@ services:
       DB_USERNAME: nestuser
       DB_PASSWORD: nestpw
       DB_DATABASE: nestjs_test
+    networks:
+      - app-network
 
   grafana:
     image: grafana/grafana:latest
@@ -53,6 +57,8 @@ services:
     depends_on:
       - prometheus
       - loki
+    networks:
+      - app-network
 
   prometheus:
     image: prom/prometheus:latest
@@ -61,6 +67,8 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - app-network
 
   loki:
     image: grafana/loki:latest
@@ -70,6 +78,8 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - ./loki/local-config.yaml:/etc/loki/local-config.yaml
+    networks:
+      - app-network
 
   promtail:
     image: grafana/promtail:latest
@@ -82,7 +92,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - loki
+    networks:
+      - app-network
 
 volumes:
   mysql_data:
   grafana_data:
+
+networks:
+  app-network:
+    driver: bridge

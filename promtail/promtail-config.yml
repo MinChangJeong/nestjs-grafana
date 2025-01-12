@@ -1,31 +1,35 @@
+# 서버 관련 설정
 server:
-  http_listen_port: 9080
-  grpc_listen_port: 0
+  http_listen_port: 9080   # Promtail HTTP 서버가 수신할 포트 설정
+  grpc_listen_port: 0      # gRPC 서버 포트를 사용하지 않도록 설정 (0은 비활성화)
 
+# 로그 위치 정보 기록을 위한 설정
 positions:
-  filename: /tmp/positions.yaml
+  filename: /tmp/positions.yaml   # 마지막으로 처리된 로그 위치를 저장할 파일 경로
 
+# Loki 서버에 로그를 전송하는 클라이언트 설정
 clients:
-  - url: http://loki:3100/loki/api/v1/push
+  - url: http://loki:3100/loki/api/v1/push  # Loki 서버의 URL (로그를 전송할 주소)
     batchwait: 1s           # 로그를 전송하기 전에 대기하는 시간 (기본값: 1s)
-    batchsize: 1048576      # 한 번에 전송하는 최대 바이트 수 (기본값: 1,048,576 bytes)
+    batchsize: 1048576      # 한 번에 전송하는 최대 바이트 수 (기본값: 1MB, 즉 1,048,576 bytes)
 
+# 로그 수집 설정
 scrape_configs:
-  - job_name: docker
+  - job_name: docker  # 수집 작업의 이름 (docker-logs로 명명됨)
     static_configs:
       - targets:
-          - localhost
+          - localhost   # 수집 대상이 되는 호스트 (여기서는 localhost)
         labels:
-          job: docker-logs
-          __path__: /var/lib/docker/containers/*/*.log
+          job: docker-logs  # 'docker-logs'라는 레이블을 지정하여 수집 작업을 구분
+          __path__: /var/lib/docker/containers/*/*.log  # Docker 컨테이너의 로그 파일 경로
 
-  - job_name: docker
+  - job_name: docker  # 두 번째 수집 작업, Docker 컨테이너의 메타데이터를 활용하여 로그 수집
     docker_sd_configs:
-      - host: unix:///var/run/docker.sock
+      - host: unix:///var/run/docker.sock  # Docker 소켓을 통해 Docker 메타데이터에 접근
     relabel_configs:
+      - source_labels: [__meta_docker_container_name]  # Docker 컨테이너 이름을 기반으로 레이블 추가
+        target_label: container  # 'container'라는 레이블을 지정하여 컨테이너 이름을 저장
       - source_labels: [__meta_docker_container_name]
-        target_label: container
-      - source_labels: [__meta_docker_container_name]
-        regex: '/(.*)'
-        replacement: '$1'
-        target_label: container_name
+        regex: '/(.*)'  # 정규식을 사용하여 컨테이너 이름을 처리
+        replacement: '$1'  # 처리된 컨테이너 이름을 레이블로 사용
+        target_label: container_name  # 'container_name' 레이블로 컨테이너 이름 저장

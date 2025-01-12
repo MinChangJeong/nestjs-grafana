@@ -11,15 +11,12 @@ import * as winston from 'winston';
 import LokiTransport from 'winston-loki';
 
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
-import { DevtoolsModule } from '@nestjs/devtools-integration';
 
+import { TypeOrmLogger } from './common/logger/typeorm-logger.service';
+import { MetricsService } from './common/metrics/metrics.service';
 
 @Module({
   imports: [ 
-    // DevtoolsModule.register({
-    //   http: true,
-    // }),
-
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
         type: 'mysql',
@@ -31,6 +28,7 @@ import { DevtoolsModule } from '@nestjs/devtools-integration';
         entities: [Board],
         synchronize: true,
         logging: true,
+        logger: new TypeOrmLogger(new MetricsService()),
       }),
     }),
 

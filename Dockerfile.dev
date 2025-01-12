@@ -1,9 +1,18 @@
 FROM node:18-alpine
+
 WORKDIR /app
 
 # package.json, yarn.lock 복사 후 설치
 COPY package.json yarn.lock ./
 RUN yarn install
 
-# 소스 코드는 볼륨 마운트로 주입 예정 -> COPY . . 생략 가능
+# 소스 코드 복사
+COPY . .
+
+# NestJS 애플리케이션 빌드
+RUN yarn build
+
+# 메모리 한도 설정 (--max-old-space-size=4096) 및 NestJS 애플리케이션 실행
+CMD ["node", "--max-old-space-size=4096", "dist/main.js"]
+
 EXPOSE 3000
