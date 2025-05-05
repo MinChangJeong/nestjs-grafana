@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Board } from './board.entity';
 import { CreateBoardDto } from './create-board.dto';
 import { Transactional } from 'typeorm-transactional';
+import { Logable } from 'src/common/decorator/log-lazy.decorator';
 
 @Injectable()
 export class BoardService {
@@ -14,7 +15,8 @@ export class BoardService {
     private readonly boardRepository: Repository<Board>,
   ) {}
 
-  @Transactional()
+  @Logable()
+  // @Transactional()
   async createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
     const { title, content } = createBoardDto;
     
@@ -23,8 +25,6 @@ export class BoardService {
       title,
       content,
     });
-    
-    throw new Error("error occured");
 
     await this.boardRepository.save(board);
 

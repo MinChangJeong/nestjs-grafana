@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BoardModule } from './board/board.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Board } from './board/board.entity';
@@ -14,6 +13,10 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 
 import { TypeOrmLogger } from './common/logger/typeorm-logger.service';
 import { MetricsService } from './common/metrics/metrics.service';
+import { BoardModule } from './board/board.module';
+
+import { AopModule } from '@toss/nestjs-aop';
+import { LogLazyDecorator } from './common/decorator/log-lazy.decorator';
 
 @Module({
   imports: [ 
@@ -55,9 +58,10 @@ import { MetricsService } from './common/metrics/metrics.service';
     }),
 
     BoardModule,
+    AopModule,
   ],
 
   controllers: [AppController],
-  providers: [AppService, DataSourceInitializer],
+  providers: [AppService, DataSourceInitializer, LogLazyDecorator],
 })
 export class AppModule {}
