@@ -15,7 +15,7 @@ export class BoardService {
     private readonly boardRepository: Repository<Board>,
   ) {}
 
-  @Logable()
+  // @Logable()
   // @Transactional()
   async createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
     const { title, content } = createBoardDto;
@@ -29,5 +29,9 @@ export class BoardService {
     await this.boardRepository.save(board);
 
     return board;
+  }
+
+  async findAll() {
+    return this.boardRepository.find();
   }
 }
